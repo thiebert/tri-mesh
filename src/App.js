@@ -1,14 +1,25 @@
 import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import Canvas from './Canvas.js';
-import Animation from "./Animation.js";
+import TransformableTriGrid from "./TransformableTriGrid.js";
+
 
 function App() {
     return (
         <div className="App">
-            <header className="App-header">
-                <Canvas width="1024" height="1024" frequency='128' color="#e1f762" fadeEnd="1000" fadeStart="700" />
-            </header>
+            <TransformableTriGrid
+                className="grid-playground"
+                drawStyle={{
+                    width: "512",
+                    height: "512",
+                    frequency: "64",
+                    color: "#e1f762",
+                    lineWidth: "3",
+                    fadeCenterX: "512",
+                    fadeCenterY: "0",
+                    fadeEnd: "500",
+                    fadeStart: "350"
+                }} />
         </div>
     );
 }

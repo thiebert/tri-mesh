@@ -1,27 +1,31 @@
 import React from 'react';
 import './App.css';
-import { bool } from 'prop-types';
 
-class Canvas extends React.Component {
+class TriGrid extends React.Component {
 
     constructor(props) {
         super(props);
         this.canvasRef = React.createRef();
+        this.points = [];
+        this.pivots = [];
+        this.className = props.className;
+        this.style = props.drawStyle;
+        this.lastFrequency = this.style.frequency;
     }
 
     getGridPoints() {
-        var frequency = parseFloat(this.props.frequency);
+        var frequency = parseFloat(this.style.frequency);
         let points = [];
         points[0] = [];
         points[0][0] = [];
         var newPoint = [0, 0];
         let row = 0;
-        while (newPoint[1] < this.props.height) {
+        while (newPoint[1] < this.style.height) {
             let column = 0;
             let evenRow = row % 2 === 0;
             points[row] = [];
             newPoint = [evenRow ? column * frequency : (column - .5) * frequency, frequency * row * .866];
-            while (newPoint[0] < this.props.width) {
+            while (newPoint[0] < this.style.width) {
                 points[row][column] = newPoint;
                 column++;
                 newPoint = [evenRow ? column * frequency : (column - .5) * frequency, frequency * row * .866];
@@ -30,26 +34,25 @@ class Canvas extends React.Component {
             column = 0;
             row++;
         }
-        console.log(points);
         return (points);
     }
 
-    randomizeGridPoints(points) {
-        var frequency = parseFloat(this.props.frequency);
+    randomizeGridPoints(points, intensity) {
+        var frequency = parseFloat(this.style.frequency);
         points.forEach(row => {
             row.forEach(point => {
-                point[0] += (Math.random() * 2 - 1) * frequency * .3;
-                point[1] += (Math.random() * 2 - 1) * frequency * .866 * .3;
+                point[0] += (Math.random() * 2 - 1) * frequency * intensity;
+                point[1] += (Math.random() * 2 - 1) * frequency * .866 * intensity;
             });
         });
         return (points);
     }
 
     determineColor(position) {
-        let fadeStart = this.props.fadeStart;
-        let fadeEnd = this.props.fadeEnd;
-        let width = this.props.width;
-        let hex = this.props.color;
+        let fadeStart = this.style.fadeStart;
+        let fadeEnd = this.style.fadeEnd;
+        let width = this.style.width;
+        let hex = this.style.color;
         var r = parseInt(hex.slice(1, 3), 16),
             g = parseInt(hex.slice(3, 5), 16),
             b = parseInt(hex.slice(5, 7), 16);
@@ -67,17 +70,7 @@ class Canvas extends React.Component {
         return ('rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')');
     }
 
-    determineGradient(ctx, start, end) {
-        var startColor = this.determineColor(start);
-        var endColor = this.determineColor(end);
-        var gradient = ctx.createLinearGradient(start[0], start[1], end[0], end[1]);
-        gradient.addColorStop(0, startColor);
-        gradient.addColorStop(1, endColor);
-        return (gradient);
-    }
-
     drawLine(ctx, startPoint, endPoint) {
-        // ctx.strokeStyle = this.determineGradient(ctx, startPoint, endPoint);
         ctx.lineTo(endPoint[0], endPoint[1]);
         ctx.stroke();
         ctx.moveTo(startPoint[0], startPoint[1]);
@@ -117,13 +110,20 @@ class Canvas extends React.Component {
     }
 
     setDrawStyle(ctx) {
-        ctx.lineWidth = 5;
+        ctx.lineWidth = this.style.lineWidth;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.imageSmoothingEnabled = true;
-        let gradient = ctx.createRadialGradient(this.props.width, 0, this.props.fadeStart, this.props.width, 0, this.props.fadeEnd);
-        gradient.addColorStop(0, this.props.color);
-        let hex = this.props.color;
+        //ToDo: add gradient styles: none, radial, linear
+        let gradient = ctx.createRadialGradient(
+            this.style.fadeCenterX,
+            this.style.fadeCenterY,
+            this.style.fadeStart,
+            this.style.fadeCenterX,
+            this.style.fadeCenterY,
+            this.style.fadeEnd);
+        gradient.addColorStop(0, this.style.color);
+        let hex = this.style.color;
         var r = parseInt(hex.slice(1, 3), 16),
             g = parseInt(hex.slice(3, 5), 16),
             b = parseInt(hex.slice(5, 7), 16);
@@ -138,18 +138,35 @@ class Canvas extends React.Component {
 
         ctx.save();
         this.setDrawStyle(ctx);
-        let points = this.getGridPoints();
-        this.drawGridPoints(ctx, this.randomizeGridPoints(points));
+        this.points = this.randomizeGridPoints(this.getGridPoints(), .3);
+        this.drawGridPoints(ctx, this.points);
         ctx.restore();
+    }
+
+    componentDidUpdate() {
+        var isActive = this.props.isActive;
+        if (isActive) {
+            const canvas = this.canvasRef.current;
+            const ctx = canvas.getContext("2d");
+            ctx.save();
+            ctx.clearRect(0, 0, this.style.width, this.style.height);
+
+            if (this.style.frequency != this.lastFrequency) {
+                this.points = this.randomizeGridPoints(this.getGridPoints(), .3);
+                this.lastFrequency = this.style.frequency;
+            }
+
+            this.setDrawStyle(ctx);
+            this.drawGridPoints(ctx, this.points);
+            ctx.restore();
+        }
     }
 
     render() {
         return (
-            <div>
-                <canvas ref={this.canvasRef} width={this.props.width} height={this.props.height} />
-            </div>
+            <canvas className={this.className} ref={this.canvasRef} width={this.style.width} height={this.style.height} />
         )
     }
 }
 
-export default Canvas;
+export default TriGrid;

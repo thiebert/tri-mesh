@@ -1,8 +1,43 @@
-.App {
-    text-align: center;
+body {
     background-color: #848c8e;
+    text-align: center;
+    padding-top: 5%;
 }
 
-.hidden {
-    display: none;
+.grid-playground {
+    border: solid #e8e8e8;
+    border-width: 3px;
+}
+
+.Controls {
+    text-align: left;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 7.5px;  
+  background: #e8e8e8;
+  outline: none;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: #e1f762;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #e1f762;
+  cursor: pointer;
 }
