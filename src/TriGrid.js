@@ -140,6 +140,10 @@ class TriGrid extends React.Component {
         this.setDrawStyle(ctx);
         this.points = this.randomizeGridPoints(this.getGridPoints(), .3);
         this.drawGridPoints(ctx, this.points);
+
+        var dataURL = canvas.toDataURL();
+        this.canvasRef.current.src = dataURL;
+
         ctx.restore();
     }
 
